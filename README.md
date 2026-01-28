@@ -51,7 +51,9 @@ npm run build
 
 ### Configuring with Claude Code
 
-Add this to your project's `.mcp.json` file (or global `~/.claude/settings.json`):
+**Option 1: Global (all projects)**
+
+Add to `~/.claude/settings.json`:
 
 ```json
 {
@@ -64,7 +66,24 @@ Add this to your project's `.mcp.json` file (or global `~/.claude/settings.json`
 }
 ```
 
-Then restart Claude Code or run `/mcp` to verify the server is connected.
+**Option 2: Single project**
+
+Add a `.mcp.json` file to your project root:
+
+```json
+{
+  "mcpServers": {
+    "applescript": {
+      "command": "node",
+      "args": ["/path/to/applescript-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+Alternatively, add to `.claude/settings.local.json` in your project (same format as above).
+
+After configuring, restart Claude Code or run `/mcp` to verify the server is connected.
 
 ### Configuring with Claude Desktop
 
