@@ -10,15 +10,26 @@
 
 ---
 
-## The 5 Tools
+## The Tools
 
+### Core Tools
 | Tool | What It Does |
 |------|-------------|
 | `list_scriptable_apps` | Shows all 50+ apps you can automate |
 | `get_app_dictionary` | Gets the "manual" for any app with examples |
-| `execute_applescript` | Runs AppleScript (with safety checks) |
+| `execute_applescript` | Runs AppleScript (with safety checks + learning) |
 | `validate_applescript` | Checks syntax + safety without running |
-| `get_system_state` | **NEW!** Shows what's happening right now |
+| `get_system_state` | Shows what's happening right now |
+
+### Learning Tools
+| Tool | What It Does |
+|------|-------------|
+| `get_workflow_pattern` | Find patterns that worked before for similar tasks |
+| `analyze_failure` | Figure out WHY a script failed + get fixes |
+| `get_app_skill` | Get curated examples and gotchas for an app |
+| `get_smart_suggestion` | AI-powered script suggestions |
+| `get_learning_stats` | See what the system has learned |
+| `discover_capabilities` | What can I automate? (context-aware) |
 
 ---
 
@@ -45,6 +56,71 @@ Claude will then retry with the safety override.
 | 🟠 High | `do shell script`, `shutdown`, `restart`, `quit every app` |
 | 🟡 Medium | `keystroke`, `key code`, `send` (email) |
 | 🟢 Low/None | Everything else |
+
+---
+
+## The Learning System 🧠
+
+The server gets smarter the more you use it. Here's how:
+
+### What Gets Remembered
+
+Every time you run a script, the server logs:
+- What you were trying to do (intent)
+- The script itself
+- Whether it worked or failed
+- The result/error message
+
+Successful patterns get a "success count" - the more times something works, the more confident the server is about suggesting it.
+
+### Where It Lives
+
+```
+~/.applescript-mcp/
+├── learned-patterns.json   # Your execution history
+├── patterns-index.json     # Fast lookup by app/action/keyword
+└── skills/                 # App-specific guides (*.md)
+```
+
+### Using the Learning Tools
+
+**Find what worked before:**
+```
+"Show me patterns that worked for creating playlists"
+→ get_workflow_pattern with intent="create playlist"
+```
+
+**Get help when things fail:**
+```
+"Why did that script fail? How do I fix it?"
+→ analyze_failure with the script and error
+```
+
+**Get app-specific tips:**
+```
+"What are the gotchas for Music.app automation?"
+→ get_app_skill with app="Music"
+```
+
+**Get smart suggestions:**
+```
+"What's the best way to get unread email count?"
+→ get_smart_suggestion with app="Mail", intent="get unread count"
+```
+
+### Apps with Skill Files
+
+These apps have curated examples and troubleshooting guides:
+- Music (lots of gotchas here!)
+- Finder
+- Safari
+- Mail
+- Calendar
+- Reminders
+- Notes
+- Messages
+- Contacts
+- Photos
 
 ---
 
@@ -189,6 +265,28 @@ Look at my Safari tabs. For any that are GitHub repos,
 tell me what they're about based on the names.
 ```
 
+### Learning System
+```
+What have you learned about automating my Mac so far?
+```
+
+```
+Show me patterns that worked for controlling Music
+```
+
+```
+What are the gotchas I should know about for Safari automation?
+```
+
+### Discovery
+```
+What can you automate on my Mac right now?
+```
+
+```
+Tell me more about what you can do with Mail
+```
+
 ---
 
 ## Troubleshooting
@@ -230,6 +328,12 @@ node dist/index.js
 
 ~/Development/asmcp/applescript-mcp/src/tools/execute.ts
   → Where safety checks live (edit DANGEROUS_PATTERNS to customize)
+
+~/Development/asmcp/applescript-mcp/src/learning/
+  → The learning system (pattern-store, analyzer, skill-loader)
+
+~/.applescript-mcp/
+  → Your learned patterns and skill files (survives reinstalls)
 ```
 
 ---
@@ -242,6 +346,8 @@ node dist/index.js
 - [ ] Auto-screenshot + describe workflow
 - [ ] Notification center integration
 - [ ] Custom quick actions ("focus mode", "meeting prep")
+- [ ] More skill files for additional apps
+- [ ] Cross-app workflow templates
 
 ---
 
