@@ -14,6 +14,26 @@ A Model Context Protocol (MCP) server that provides LLM access to macOS AppleScr
 - **Smart Suggestions**: Context-aware script recommendations based on learned patterns and skill files
 - **Capability Discovery**: Shows what's possible based on currently running apps
 
+## Requirements
+
+- **macOS** (AppleScript is a macOS-only technology)
+- **Node.js** 18 or later
+- **Xcode** (full installation, not just Command Line Tools)
+
+### Why Xcode?
+
+The server uses the `sdef` command to retrieve AppleScript dictionaries from applications. This command requires Xcode to be installed and selected as the active developer directory.
+
+To verify your setup:
+```bash
+sdef /System/Applications/Notes.app | head -5
+```
+
+If you see XML output, you're good. If you get an error about Xcode, install Xcode from the App Store and run:
+```bash
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+```
+
 ## Installation
 
 ```bash
