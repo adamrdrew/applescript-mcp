@@ -49,6 +49,23 @@ npm run build
 
 ## Usage
 
+### Configuring with Claude Code
+
+Add this to your project's `.mcp.json` file (or global `~/.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "applescript": {
+      "command": "node",
+      "args": ["/path/to/applescript-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+Then restart Claude Code or run `/mcp` to verify the server is connected.
+
 ### Configuring with Claude Desktop
 
 Add this to your Claude Desktop configuration file (`~/Library/Application Support/Claude/claude_desktop_config.json`):
