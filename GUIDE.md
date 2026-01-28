@@ -1,4 +1,4 @@
-# AppleScript MCP - The Drunk Developer's Guide to Mac Automation
+# AppleScript MCP - Guide
 
 *Written by drunk-you, for sober-you. You're welcome.*
 
