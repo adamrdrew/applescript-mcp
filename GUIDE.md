@@ -1,0 +1,248 @@
+# AppleScript MCP - The Drunk Developer's Guide to Mac Automation
+
+*Written by drunk-you, for sober-you. You're welcome.*
+
+## Quick Start
+
+1. **Restart Claude Desktop** to pick up the new MCP config
+2. Look for the 🔧 tools icon in Claude Desktop - you should see 5 tools
+3. Try: "What's happening on my Mac right now?"
+
+---
+
+## The 5 Tools
+
+| Tool | What It Does |
+|------|-------------|
+| `list_scriptable_apps` | Shows all 50+ apps you can automate |
+| `get_app_dictionary` | Gets the "manual" for any app with examples |
+| `execute_applescript` | Runs AppleScript (with safety checks) |
+| `validate_applescript` | Checks syntax + safety without running |
+| `get_system_state` | **NEW!** Shows what's happening right now |
+
+---
+
+## Safety Checks (And How to YOLO)
+
+### Default Behavior
+Scripts are analyzed for danger before running:
+- **Critical/High risk** = BLOCKED (needs `confirmedDangerous: true`)
+- **Medium risk** = Warning shown but runs
+- **Low/None** = Runs normally
+
+### Going Full YOLO
+To disable safety for a specific script, Claude needs to pass `confirmedDangerous: true`.
+
+Just tell Claude: *"Yes, I understand the risks. Run it anyway."*
+
+Claude will then retry with the safety override.
+
+### What Gets Flagged
+
+| Risk | Patterns |
+|------|----------|
+| 🔴 Critical | `delete every file`, `empty trash`, `delete all events` |
+| 🟠 High | `do shell script`, `shutdown`, `restart`, `quit every app` |
+| 🟡 Medium | `keystroke`, `key code`, `send` (email) |
+| 🟢 Low/None | Everything else |
+
+---
+
+## The Coolest Apps to Automate
+
+### Finder
+```
+"Move all screenshots from Desktop to a Screenshots folder"
+"Find files larger than 1GB and list them"
+"Get the name of whatever I have selected"
+```
+
+### Safari
+```
+"What tabs do I have open?"
+"Open these 5 URLs in new tabs"
+"Get the URL of the current page"
+"Run JavaScript on the current page to extract all links"
+```
+
+### Mail
+```
+"Check for new mail"
+"Create a new email to bob@example.com about the project"
+"How many unread emails do I have?"
+```
+
+### Calendar
+```
+"What meetings do I have today?"
+"Create a meeting for tomorrow at 2pm"
+"When is my next event?"
+```
+
+### Notes
+```
+"Create a note with today's thoughts"
+"Find notes containing 'project'"
+"Add to my Ideas note"
+```
+
+### Music
+```
+"What's playing?"
+"Pause the music"
+"Play my Chill playlist"
+"Skip this track"
+```
+
+### Messages
+```
+"Send a message to Mom saying I'll be late"
+"Read my last message from [contact]"
+```
+
+### Reminders
+```
+"Add a reminder to buy milk tomorrow"
+"What's on my reminders list?"
+"Complete the 'buy milk' reminder"
+```
+
+### System Events (Power User Stuff)
+```
+"What app is in front?"
+"List all running apps"
+"Hide all apps except the frontmost"
+"Click the X button on the current window"
+```
+
+---
+
+## Killer Workflows
+
+### 1. Daily Standup Prep
+```
+"Get my calendar events for today, my unread emails count,
+and create a note summarizing what I need to focus on"
+```
+
+### 2. Research Mode
+```
+"Look at my Safari tabs and create a note summarizing
+what topics I'm researching based on the URLs"
+```
+
+### 3. End of Day
+```
+"Pause music, close all browser tabs except pinned ones,
+and create a note with what tabs I had open"
+```
+
+### 4. Context Awareness
+```
+"What am I working on right now?"
+(Uses get_system_state to see frontmost app, clipboard, etc.)
+```
+
+### 5. Multi-App Orchestration
+```
+"Find any PDFs I downloaded today, move them to my
+Documents/PDFs folder, and add a reminder to review them"
+```
+
+---
+
+## Test Prompts for Claude Desktop
+
+Copy-paste these to try:
+
+### Basic Test
+```
+What apps can you control on my Mac?
+```
+
+### Context Awareness
+```
+What am I doing right now? What's in my clipboard? What tabs do I have open?
+```
+
+### Fun Multi-App
+```
+I'm researching something in Safari. Look at my open tabs and create
+a note summarizing what topics I seem to be interested in. Be creative!
+```
+
+### Music Integration
+```
+What's my current music situation? Am I listening to anything?
+What's the volume set to?
+```
+
+### Productivity
+```
+Help me focus. What apps are open that might be distracting me?
+Suggest which ones I should close.
+```
+
+### Advanced
+```
+Look at my Safari tabs. For any that are GitHub repos,
+tell me what they're about based on the names.
+```
+
+---
+
+## Troubleshooting
+
+### "Permission denied"
+1. Open System Settings → Privacy & Security → Automation
+2. Find Terminal/iTerm/Claude and enable the apps it needs
+
+### "App not running"
+Add `activate` to wake up the app first, or just tell Claude the app isn't open.
+
+### Safety Check Blocked Me
+Either:
+- Tell Claude you understand and want to proceed anyway
+- Or be thankful the safety check saved your ass
+
+---
+
+## Debug Mode
+
+To see what the MCP server is doing:
+
+```bash
+cd ~/Development/asmcp/applescript-mcp
+node dist/index.js
+# Then interact with it via stdin (or just use Claude Desktop)
+```
+
+---
+
+## Files of Interest
+
+```
+~/Library/Application Support/Claude/claude_desktop_config.json
+  → MCP server config
+
+~/Development/asmcp/applescript-mcp/
+  → The actual server code
+
+~/Development/asmcp/applescript-mcp/src/tools/execute.ts
+  → Where safety checks live (edit DANGEROUS_PATTERNS to customize)
+```
+
+---
+
+## Future Ideas (For When You're Sober)
+
+- [ ] Add Shortcuts.app integration
+- [ ] Voice control via say command
+- [ ] Screen recording automation
+- [ ] Auto-screenshot + describe workflow
+- [ ] Notification center integration
+- [ ] Custom quick actions ("focus mode", "meeting prep")
+
+---
+
+*Built during a productive evening of pinot noir. 🍷*
