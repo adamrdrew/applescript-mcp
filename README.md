@@ -240,6 +240,4 @@ applescript-mcp/
 └── README.md
 ```
 
-## License
 
-MIT
