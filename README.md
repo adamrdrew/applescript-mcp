@@ -59,6 +59,12 @@ npx -y applescript-mcp
 
 ### Configuring with Claude Code
 
+#### Plugin
+
+You can install 
+
+#### Local Development / File Based
+
 **Option 1: Global (all projects)**
 
 Add to `~/.claude/settings.json`:
