@@ -7,12 +7,15 @@ This guide covers building, testing, and extending the AppleScript MCP server.
 ## Build Commands
 
 ```bash
-npm run build      # Compile TypeScript to dist/
-npm run dev        # Watch mode for development
-npm run typecheck  # Type check without emitting
-npm test           # Run integration tests (requires build first)
-npm start          # Run the server (requires build first)
-npm run clean      # Remove dist/
+npm run build            # Compile TypeScript to dist/
+npm run dev              # Watch mode for development
+npm run typecheck        # Type check without emitting
+npm test                 # Run unit tests (vitest)
+npm run test:watch       # Run unit tests in watch mode
+npm run test:coverage    # Run unit tests with coverage report
+npm run test:integration # Run MCP integration tests (requires build)
+npm start                # Run the server (requires build first)
+npm run clean            # Remove dist/
 ```
 
 ## Project Structure
@@ -157,13 +160,90 @@ export function isMyToolParams(value: unknown): value is MyToolParams {
 
 ## Testing
 
+### Test Framework
+
+The project uses **vitest** for unit testing and a custom integration test script.
+
 ### Run Tests
 
 ```bash
-npm run build && npm test
+# Unit tests (fast, no build required)
+npm test
+
+# Unit tests with coverage
+npm run test:coverage
+
+# Integration tests (requires build)
+npm run build && npm run test:integration
+
+# Full verification
+npm run typecheck && npm run build && npm test && npm run test:integration
 ```
 
-### Test Script Overview
+### Unit Test Structure
+
+Unit tests are co-located with source files using the `.test.ts` suffix:
+
+```
+src/
+├── types.ts
+├── types.test.ts          # 44 tests for type guards
+├── test-utils.ts          # Mock utilities
+├── test-utils.test.ts     # 21 tests for utilities
+├── apple/
+│   ├── executor.ts
+│   ├── executor.test.ts   # 30 tests for script execution
+│   ├── sdef-parser.ts
+│   └── sdef-parser.test.ts # 23 tests for SDEF parsing
+├── learning/
+│   ├── pattern-store.ts
+│   ├── pattern-store.test.ts # 38 tests for pattern extraction
+│   ├── analyzer.ts
+│   └── analyzer.test.ts   # 23 tests for failure analysis
+└── tools/
+    ├── execute.ts
+    └── execute.test.ts    # 35 tests for safety system
+```
+
+### Writing Unit Tests
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { myFunction } from './my-module.js';
+
+describe('myFunction', () => {
+  it('handles success case', () => {
+    const result = myFunction('input');
+    expect(result.success).toBe(true);
+  });
+
+  it('handles error case', () => {
+    const result = myFunction('');
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('required');
+  });
+});
+```
+
+### Test Utilities
+
+The `src/test-utils.ts` module provides mock factories:
+
+```typescript
+import { createMockCommandExecutor, createMockFileSystem } from '../test-utils.js';
+
+// Mock command execution
+const runner = createMockCommandExecutor({
+  'osascript -e return 1': { stdout: '1', stderr: '' },
+});
+
+// Mock file system
+const fs = createMockFileSystem({
+  '/path/to/file.txt': 'content',
+});
+```
+
+### Integration Test Overview
 
 `scripts/test-server.js` tests:
 1. MCP initialize handshake
@@ -172,7 +252,7 @@ npm run build && npm test
 4. Tools list (expected tools present)
 5. Tool execution (discover_capabilities)
 
-### Adding Tests
+### Adding Integration Tests
 
 Add test cases to `scripts/test-server.js`:
 
