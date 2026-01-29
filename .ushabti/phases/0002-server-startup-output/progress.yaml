@@ -1,0 +1,77 @@
+phase:
+  id: "0002"
+  slug: server-startup-output
+  title: Server Startup Output
+  status: complete
+
+steps:
+  - id: S001
+    title: Create version utility module
+    implemented: true
+    reviewed: true
+    notes: "Created src/version.ts with getPackageVersion() and formatStartupBanner(). Uses import.meta.url for path resolution, injectable file reader for testability, type guard for package.json parsing, and fallback to 'unknown' on failure."
+    touched:
+      - src/version.ts
+
+  - id: S002
+    title: Add unit tests for version utility
+    implemented: true
+    reviewed: true
+    notes: "Created src/version.test.ts with 10 tests covering getPackageVersion: success cases (valid JSON, extra fields, prerelease), failure cases (file read error, invalid JSON, missing/invalid version, empty object, null), and default file reader integration."
+    touched:
+      - src/version.test.ts
+
+  - id: S003
+    title: Create startup banner function
+    implemented: true
+    reviewed: true
+    notes: "formatStartupBanner() was included in src/version.ts during S001. Function accepts version as parameter, returns formatted string without printing directly."
+    touched:
+      - src/version.ts
+
+  - id: S004
+    title: Add unit tests for banner formatting
+    implemented: true
+    reviewed: true
+    notes: "6 tests for formatStartupBanner in src/version.test.ts: formats with version, unknown version, prerelease version, includes apple emoji, includes checkmark, verifies blank line structure."
+    touched:
+      - src/version.test.ts
+
+  - id: S005
+    title: Integrate startup banner into main()
+    implemented: true
+    reviewed: true
+    notes: "Added import of version utilities to src/index.ts. In main(), read version and format banner, then write to process.stderr before server.connect(). Uses stderr to preserve MCP protocol on stdout."
+    touched:
+      - src/index.ts
+
+  - id: S006
+    title: Verify MCP protocol integrity
+    implemented: true
+    reviewed: true
+    notes: "Integration tests pass (9/9). Manually verified banner appears on stderr without interfering with MCP protocol. Server responds correctly to initialize, tools/list, and tool execution requests."
+    touched: []
+
+  - id: S007
+    title: Consider server config version sync
+    implemented: true
+    reviewed: true
+    notes: "Decision: Sync the MCP server config version with package.json. Updated createServer() to accept version as parameter. main() now reads version once and passes to both banner and createServer(). Single source of truth for version achieved."
+    touched:
+      - src/index.ts
+
+  - id: S008
+    title: Update documentation
+    implemented: true
+    reviewed: true
+    notes: "Updated development.md: added Server Startup section explaining banner output to stderr, added version.ts to project structure, updated release checklist to reflect single source of truth for version. Updated README.md: added startup banner example in Running Standalone section, added version.ts to project structure."
+    touched:
+      - .ushabti/docs/development.md
+      - README.md
+
+  - id: S009
+    title: Final verification
+    implemented: true
+    reviewed: true
+    notes: "All acceptance criteria verified: (1) typecheck passes, (2) 230 unit tests pass across 8 test files, (3) 9/9 integration tests pass, (4) banner displays correctly on stderr with version 2.1.0 matching package.json, (5) MCP protocol remains functional."
+    touched: []

@@ -114,6 +114,16 @@ Add this to your Claude Desktop configuration file (`~/Library/Application Suppo
 npm start
 ```
 
+When the server starts, you'll see a welcome banner:
+```
+🍎 Welcome to AppleScript MCP
+Version X.Y.Z
+
+✅ Server now running...
+```
+
+The server then waits for MCP protocol connections on stdin/stdout.
+
 ## Available Tools
 
 ### `list_scriptable_apps`
@@ -375,6 +385,7 @@ npm run build    # Production build
 applescript-mcp/
 ├── src/
 │   ├── index.ts              # MCP server entry point
+│   ├── version.ts            # Version reading and startup banner
 │   ├── types.ts              # TypeScript interfaces
 │   ├── tools/
 │   │   ├── list-apps.ts      # List scriptable applications

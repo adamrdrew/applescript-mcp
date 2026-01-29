@@ -18,12 +18,28 @@ npm start                # Run the server (requires build first)
 npm run clean            # Remove dist/
 ```
 
+## Server Startup
+
+When the server starts, it displays a welcome banner to stderr:
+
+```
+🍎 Welcome to AppleScript MCP
+Version X.Y.Z
+
+✅ Server now running...
+```
+
+The version is read dynamically from `package.json` at runtime. This ensures the banner, MCP server configuration, and npm package all report the same version from a single source of truth.
+
+**Note:** The banner is written to stderr, not stdout. Stdout is reserved for the MCP JSON-RPC protocol communication with clients.
+
 ## Project Structure
 
 ```
 applescript-mcp/
 ├── src/
 │   ├── index.ts              # MCP server entry point
+│   ├── version.ts            # Version reading and startup banner
 │   ├── types.ts              # TypeScript interfaces
 │   ├── tools/                # Tool implementations
 │   │   ├── list-apps.ts
@@ -383,9 +399,13 @@ import { foo } from './bar';     // Wrong
 
 ## Release Checklist
 
-1. Update version in `package.json`
-2. Update version in `src/index.ts` (server version)
+1. Update version in `package.json` (single source of truth for version)
+2. Update version in `.claude-plugin/plugin.json` (must stay in sync with package.json per L24)
 3. Run `npm run build`
 4. Run `npm test`
-5. Test manually with Claude Desktop
-6. Commit and tag
+5. Run `npm run test:integration`
+6. Test manually with Claude Desktop
+7. Commit and create git tag matching version
+8. Run `./release.sh` to publish
+
+**Note:** The server reads its version from `package.json` at runtime, so updating `package.json` is sufficient. The hardcoded version in `src/index.ts` was removed.
