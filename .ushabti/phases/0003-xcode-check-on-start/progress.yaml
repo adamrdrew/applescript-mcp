@@ -1,0 +1,69 @@
+phase:
+  id: "0003"
+  slug: xcode-check-on-start
+  title: Xcode Check on Start
+  status: complete
+
+steps:
+  - id: S001
+    title: Create Xcode check module
+    implemented: true
+    reviewed: true
+    notes: "Created src/xcode-check.ts with checkXcodeInstalled() function. Uses injectable pathChecker for testability, following version.ts pattern. Returns XcodeCheckResult interface with installed boolean."
+    touched:
+      - src/xcode-check.ts
+
+  - id: S002
+    title: Implement error message formatting
+    implemented: true
+    reviewed: true
+    notes: "Implemented formatXcodeMissingError() in xcode-check.ts. Message includes: statement that Xcode is required, explanation about sdef command, Mac App Store link, and post-install xcode-select instruction."
+    touched:
+      - src/xcode-check.ts
+
+  - id: S003
+    title: Integrate check into server startup
+    implemented: true
+    reviewed: true
+    notes: "Modified main() in index.ts to check for Xcode after version read but before banner display. On failure, writes error to stderr and exits with code 1."
+    touched:
+      - src/index.ts
+
+  - id: S004
+    title: Write unit tests for xcode-check module
+    implemented: true
+    reviewed: true
+    notes: "Created 12 unit tests covering: Xcode present case, Xcode absent case, path checking, error message content including required elements (Xcode required statement, sdef explanation, App Store URL, xcode-select instruction). All tests pass."
+    touched:
+      - src/xcode-check.test.ts
+
+  - id: S005
+    title: Write integration test for startup behavior
+    implemented: true
+    reviewed: true
+    notes: "Created scripts/test-xcode-check.js integration test. Tests: server startup with Xcode installed, error message format verification (3 required elements), check function behavior with mocks. Handles both Xcode-present and Xcode-absent machine scenarios. All 6 tests pass."
+    touched:
+      - scripts/test-xcode-check.js
+
+  - id: S006
+    title: Verify normal startup still works
+    implemented: true
+    reviewed: true
+    notes: "Verified: npm run build succeeds, npm test passes (242 tests), npm run test:integration passes (9 tests), server starts normally with Xcode present, startup banner displays correctly."
+    touched: []
+
+  - id: S007
+    title: Update documentation
+    implemented: true
+    reviewed: true
+    notes: "Updated development.md with Xcode Requirement Check section, added xcode-check.ts to project structure, added test-xcode-check.js to scripts. Updated apple-integration.md with cross-reference to startup check."
+    touched:
+      - .ushabti/docs/development.md
+      - .ushabti/docs/apple-integration.md
+
+  - id: S008
+    title: Type check and final verification
+    implemented: true
+    reviewed: true
+    notes: "Final verification complete: npm run typecheck passes, npm run build succeeds, npm test passes (242 tests in 9 files), npm run test:integration passes (9 tests), Xcode check integration tests pass (6 tests). All acceptance criteria met."
+    touched: []

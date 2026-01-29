@@ -20,7 +20,30 @@ npm run clean            # Remove dist/
 
 ## Server Startup
 
-When the server starts, it displays a welcome banner to stderr:
+### Xcode Requirement Check
+
+On startup, the server checks if Xcode is installed at `/Applications/Xcode.app`. This check is required because the `sdef` command, used to retrieve application scripting dictionaries, is only available when Xcode is installed.
+
+If Xcode is not installed, the server exits immediately with an error message:
+
+```
+Xcode is required but not installed.
+
+The AppleScript MCP Server uses the 'sdef' command to retrieve application
+scripting dictionaries. This command is only available when Xcode is installed.
+
+To install Xcode:
+  https://apps.apple.com/us/app/xcode/id497799835?mt=12
+
+After installation, you may need to run:
+  sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+```
+
+The server exits with exit code 1 when Xcode is missing.
+
+### Startup Banner
+
+When Xcode is present and the server starts successfully, it displays a welcome banner to stderr:
 
 ```
 🍎 Welcome to AppleScript MCP
@@ -31,7 +54,7 @@ Version X.Y.Z
 
 The version is read dynamically from `package.json` at runtime. This ensures the banner, MCP server configuration, and npm package all report the same version from a single source of truth.
 
-**Note:** The banner is written to stderr, not stdout. Stdout is reserved for the MCP JSON-RPC protocol communication with clients.
+**Note:** Both the error message and banner are written to stderr, not stdout. Stdout is reserved for the MCP JSON-RPC protocol communication with clients.
 
 ## Project Structure
 
@@ -40,6 +63,7 @@ applescript-mcp/
 ├── src/
 │   ├── index.ts              # MCP server entry point
 │   ├── version.ts            # Version reading and startup banner
+│   ├── xcode-check.ts        # Xcode installation verification
 │   ├── types.ts              # TypeScript interfaces
 │   ├── tools/                # Tool implementations
 │   │   ├── list-apps.ts
@@ -56,7 +80,8 @@ applescript-mcp/
 │       ├── executor.ts
 │       └── sdef-parser.ts
 ├── scripts/
-│   └── test-server.js        # Integration tests
+│   ├── test-server.js        # MCP integration tests
+│   └── test-xcode-check.js   # Xcode check integration tests
 ├── dist/                     # Compiled output
 ├── package.json
 ├── tsconfig.json
