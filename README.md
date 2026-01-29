@@ -36,6 +36,8 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 ## Installation
 
+### From Source
+
 ```bash
 # Clone or download this repository
 cd applescript-mcp
@@ -45,6 +47,12 @@ npm install
 
 # Build the TypeScript
 npm run build
+```
+
+### Via NPX
+
+```bash
+npx -y applescript-mcp
 ```
 
 ## Usage
