@@ -1,4 +1,4 @@
-# AppleScript MCP Server
+# 🍎 AppleScript MCP Server
 
 Give Claude the power to control your Mac. This MCP server lets Claude automate applications, manage files, control music, send messages, and much more through AppleScript.
 
