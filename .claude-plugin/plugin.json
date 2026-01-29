@@ -1,0 +1,14 @@
+{
+    "name": "applescript-mcp",
+    "description": "A Model Context Protocol (MCP) server that provides LLM access to macOS AppleScript automation.",
+    "version": "1.0.0",
+    "author": {
+        "name": "Adam Drew",
+        "email": "adamrdrew@live.com"
+    },
+    "mcpServers": {
+        "applescript-mcp": {
+            "command": "npx -y applescript-mcp"
+        }
+    }
+}
