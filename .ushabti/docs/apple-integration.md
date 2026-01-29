@@ -183,7 +183,9 @@ Clears the in-memory dictionary cache.
 
 ### Xcode Requirement
 
-The `sdef` command requires Xcode to be installed and selected:
+The `sdef` command requires Xcode to be installed and selected.
+
+**Startup Check:** The server verifies Xcode is installed at `/Applications/Xcode.app` on startup. If missing, the server exits with an error message including the Mac App Store installation link. See [Development Guide](development.md#xcode-requirement-check) for details.
 
 ```bash
 # Check if sdef works

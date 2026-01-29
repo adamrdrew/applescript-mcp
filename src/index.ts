@@ -37,6 +37,7 @@ import {
   isDiscoverCapabilitiesParams,
 } from './types.js';
 import { getPackageVersion, formatStartupBanner } from './version.js';
+import { checkXcodeInstalled, formatXcodeMissingError } from './xcode-check.js';
 
 /**
  * Tool definitions for the MCP server
@@ -570,6 +571,14 @@ function createServer(version: string): Server {
 async function main(): Promise<void> {
   // Read version once from package.json (single source of truth)
   const version = getPackageVersion();
+
+  // Check for Xcode installation before proceeding
+  const xcodeCheck = checkXcodeInstalled();
+  if (!xcodeCheck.installed) {
+    const errorMessage = formatXcodeMissingError();
+    process.stderr.write(errorMessage + '\n');
+    process.exit(1);
+  }
 
   // Display startup banner to stderr (not stdout, which is used by MCP protocol)
   const banner = formatStartupBanner(version);
