@@ -154,6 +154,4 @@ Not all apps are scriptable. Ask Claude to run `list_scriptable_apps` to see wha
 
 Want to contribute, run from source, or understand the codebase? See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-## License
-
-MIT
+Want even deeper documentaiton? See the [Project Documentation](.ushabti/docs/index.md)

@@ -1,11 +1,16 @@
 {
     "name": "applescript-mcp",
     "description": "A Model Context Protocol (MCP) server that provides LLM access to macOS AppleScript automation.",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "author": {
         "name": "Adam Drew",
-        "email": "adamrdrew@live.com"
+        "email": "adamrdrew@live.com",
+        "url": "https://github.com/adamrdrew"
     },
+    "keywords": ["mcp", "applescript", "macos", "mac", "desktop", "automation"],
+    "homepage": "https://github.com/adamrdrew/applescript-mcp",
+    "repository": "https://github.com/adamrdrew/applescript-mcp",
+    "license": "GPLv3",
     "mcpServers": {
         "applescript-mcp-server": {
             "command": "npx",

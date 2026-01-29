@@ -1,6 +1,6 @@
 {
   "name": "applescript-mcp",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "MCP server for macOS AppleScript automation",
   "type": "module",
   "main": "dist/index.js",
@@ -27,7 +27,7 @@
     "model-context-protocol"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
   },
