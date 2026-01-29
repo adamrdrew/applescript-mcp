@@ -138,7 +138,7 @@ async function saveIndex(): Promise<void> {
 /**
  * Extract keywords from intent/script for indexing
  */
-function extractKeywords(text: string): string[] {
+export function extractKeywords(text: string): string[] {
   const stopWords = new Set(['the', 'a', 'an', 'to', 'from', 'in', 'on', 'at', 'of', 'for', 'with', 'and', 'or', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'me', 'my', 'mine', 'we', 'us', 'our', 'ours', 'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'hers', 'they', 'them', 'their', 'theirs']);
 
   return text
@@ -151,7 +151,7 @@ function extractKeywords(text: string): string[] {
 /**
  * Extract action verbs from script
  */
-function extractActions(script: string): string[] {
+export function extractActions(script: string): string[] {
   const actionPatterns = [
     /\b(create|make|new)\b/gi,
     /\b(delete|remove|trash)\b/gi,
@@ -181,7 +181,7 @@ function extractActions(script: string): string[] {
 /**
  * Determine category from apps and actions
  */
-function categorize(apps: string[], actions: string[]): ExecutionRecord['category'] {
+export function categorize(apps: string[], actions: string[]): ExecutionRecord['category'] {
   const appSet = new Set(apps.map(a => a.toLowerCase()));
   const actionSet = new Set(actions);
 
@@ -207,7 +207,7 @@ function categorize(apps: string[], actions: string[]): ExecutionRecord['categor
 /**
  * Extract app names from a script
  */
-function extractApps(script: string): string[] {
+export function extractApps(script: string): string[] {
   const appMatches = script.match(/tell application "([^"]+)"/gi) || [];
   return appMatches.map(m => {
     const match = m.match(/"([^"]+)"/);
@@ -305,7 +305,7 @@ export async function logExecution(
 /**
  * Normalize a script for comparison (remove whitespace variations)
  */
-function normalizeScript(script: string): string {
+export function normalizeScript(script: string): string {
   return script.replace(/\s+/g, ' ').trim().toLowerCase();
 }
 

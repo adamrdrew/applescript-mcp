@@ -16,8 +16,15 @@ import type {
  * Uses regex-based parsing since we're dealing with well-formed sdef XML
  */
 
-const CACHE_TTL = 3600000; // 1 hour
+export const CACHE_TTL = 3600000; // 1 hour
 const dictionaryCache = new Map<string, CacheEntry<AppleScriptDictionary>>();
+
+/**
+ * Get the current cache size (for testing)
+ */
+export function getCacheSize(): number {
+  return dictionaryCache.size;
+}
 
 /**
  * Parse an sdef XML string into a structured dictionary

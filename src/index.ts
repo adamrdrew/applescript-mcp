@@ -26,7 +26,16 @@ import {
 } from './tools/discover.js';
 import { logExecution } from './learning/pattern-store.js';
 import { generateSmartErrorMessage } from './learning/analyzer.js';
-import { isExecuteParams, isGetDictionaryParams } from './types.js';
+import {
+  isGetDictionaryParams,
+  isExtendedExecuteParams,
+  isValidateScriptParams,
+  isWorkflowPatternParams,
+  isAnalyzeFailureParams,
+  isAppSkillParams,
+  isSmartSuggestionParams,
+  isDiscoverCapabilitiesParams,
+} from './types.js';
 
 /**
  * Tool definitions for the MCP server
@@ -218,26 +227,6 @@ const tools: Tool[] = [
 ];
 
 /**
- * Extended type for execute params
- */
-interface ExtendedExecuteParams {
-  script: string;
-  intent?: string;
-  timeout?: number;
-  confirmedDangerous?: boolean;
-}
-
-function isExtendedExecuteParams(value: unknown): value is ExtendedExecuteParams {
-  if (typeof value !== 'object' || value === null) return false;
-  const obj = value as Record<string, unknown>;
-  if (typeof obj['script'] !== 'string') return false;
-  if (obj['intent'] !== undefined && typeof obj['intent'] !== 'string') return false;
-  if (obj['timeout'] !== undefined && typeof obj['timeout'] !== 'number') return false;
-  if (obj['confirmedDangerous'] !== undefined && typeof obj['confirmedDangerous'] !== 'boolean') return false;
-  return true;
-}
-
-/**
  * Create and configure the MCP server
  */
 function createServer(): Server {
@@ -362,14 +351,13 @@ function createServer(): Server {
         }
 
         case 'validate_applescript': {
-          const script = (args as { script?: unknown })?.script;
-          if (typeof script !== 'string') {
+          if (!isValidateScriptParams(args)) {
             return {
               content: [{ type: 'text', text: JSON.stringify({ success: false, error: '"script" required' }) }],
               isError: true,
             };
           }
-          const result = await validateScript(script);
+          const result = await validateScript(args.script);
           return {
             content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           };
@@ -385,11 +373,7 @@ function createServer(): Server {
         // === SMART/LEARNING TOOLS ===
 
         case 'get_workflow_pattern': {
-          const intent = (args as { intent?: string })?.intent;
-          const app = (args as { app?: string })?.app;
-          const action = (args as { action?: string })?.action;
-
-          if (typeof intent !== 'string') {
+          if (!isWorkflowPatternParams(args)) {
             return {
               content: [{ type: 'text', text: JSON.stringify({ success: false, error: '"intent" required' }) }],
               isError: true,
@@ -397,9 +381,9 @@ function createServer(): Server {
           }
 
           const patternOptions: { app?: string; action?: string } = {};
-          if (app) patternOptions.app = app;
-          if (action) patternOptions.action = action;
-          const result = await getWorkflowPattern(intent, patternOptions);
+          if (args.app) patternOptions.app = args.app;
+          if (args.action) patternOptions.action = args.action;
+          const result = await getWorkflowPattern(args.intent, patternOptions);
 
           // Format nicely for LLM
           if (result.success && result.data) {
@@ -432,17 +416,14 @@ function createServer(): Server {
         }
 
         case 'analyze_failure': {
-          const script = (args as { script?: string })?.script;
-          const error = (args as { error?: string })?.error;
-
-          if (typeof script !== 'string' || typeof error !== 'string') {
+          if (!isAnalyzeFailureParams(args)) {
             return {
               content: [{ type: 'text', text: JSON.stringify({ success: false, error: '"script" and "error" required' }) }],
               isError: true,
             };
           }
 
-          const result = await analyzeScriptFailure(script, error);
+          const result = await analyzeScriptFailure(args.script, args.error);
 
           if (result.success && result.data) {
             return {
@@ -457,16 +438,14 @@ function createServer(): Server {
         }
 
         case 'get_app_skill': {
-          const app = (args as { app?: string })?.app;
-
-          if (typeof app !== 'string') {
+          if (!isAppSkillParams(args)) {
             return {
               content: [{ type: 'text', text: JSON.stringify({ success: false, error: '"app" required' }) }],
               isError: true,
             };
           }
 
-          const result = await getAppSkillGuide(app);
+          const result = await getAppSkillGuide(args.app);
 
           if (result.success && result.data) {
             if (result.data.skill) {
@@ -475,7 +454,7 @@ function createServer(): Server {
               };
             } else {
               return {
-                content: [{ type: 'text', text: `No skill file found for "${app}". Available skills can be listed with get_learning_stats.` }],
+                content: [{ type: 'text', text: `No skill file found for "${args.app}". Available skills can be listed with get_learning_stats.` }],
               };
             }
           }
@@ -487,20 +466,17 @@ function createServer(): Server {
         }
 
         case 'get_smart_suggestion': {
-          const app = (args as { app?: string })?.app;
-          const intent = (args as { intent?: string })?.intent;
-
-          if (typeof app !== 'string' || typeof intent !== 'string') {
+          if (!isSmartSuggestionParams(args)) {
             return {
               content: [{ type: 'text', text: JSON.stringify({ success: false, error: '"app" and "intent" required' }) }],
               isError: true,
             };
           }
 
-          const result = await getSmartSuggestion(app, intent);
+          const result = await getSmartSuggestion(args.app, args.intent);
 
           if (result.success && result.data) {
-            let output = `## Smart Suggestion for ${app}\n\n`;
+            let output = `## Smart Suggestion for ${args.app}\n\n`;
             output += `**Confidence:** ${result.data.confidence}\n`;
             output += `**Based on:** ${result.data.basedOn}\n\n`;
             output += `\`\`\`applescript\n${result.data.suggestion}\n\`\`\`\n`;
@@ -552,8 +528,13 @@ function createServer(): Server {
         // === DISCOVERABILITY ===
 
         case 'discover_capabilities': {
-          const app = (args as { app?: string })?.app;
-          const result = await discoverCapabilities(app);
+          if (!isDiscoverCapabilitiesParams(args)) {
+            return {
+              content: [{ type: 'text', text: JSON.stringify({ success: false, error: 'Invalid parameters' }) }],
+              isError: true,
+            };
+          }
+          const result = await discoverCapabilities(args.app);
 
           if (result.success && result.data) {
             return {
