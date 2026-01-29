@@ -1,414 +1,159 @@
 # AppleScript MCP Server
 
-A Model Context Protocol (MCP) server that provides LLM access to macOS AppleScript automation. This server enables AI assistants to discover scriptable applications, understand their capabilities through AppleScript dictionaries, and execute automation scripts safely.
+Give Claude the power to control your Mac. This MCP server lets Claude automate applications, manage files, control music, send messages, and much more through AppleScript.
 
-## Features
+## What Can You Do With It?
 
-- **List Scriptable Apps**: Discover all applications on your Mac that support AppleScript automation
-- **Get App Dictionaries**: Retrieve comprehensive, LLM-friendly documentation with **examples** for each app
-- **Execute Scripts**: Run AppleScript code with proper error handling and timeout support
-- **Validate Scripts**: Check script syntax before execution
-- **Safety Analysis**: Automatic detection of dangerous operations (bulk deletes, system commands, etc.)
-- **Helpful Errors**: Error messages that explain what went wrong and how to fix it
-- **Learning System**: Remembers successful patterns and suggests fixes based on past executions
-- **Smart Suggestions**: Context-aware script recommendations based on learned patterns and skill files
-- **Capability Discovery**: Shows what's possible based on currently running apps
+Once installed, just ask Claude things like:
+
+- **"What's playing right now?"** — Claude checks Music.app and tells you
+- **"Create a reminder to call Mom tomorrow at 3pm"** — Creates it in Reminders
+- **"Add a new note called 'Meeting Notes' with today's date"** — Creates it in Notes
+- **"Open my Downloads folder"** — Opens it in Finder
+- **"What apps are running?"** — Lists your active applications
+- **"Play my Chill playlist"** — Starts playback in Music
+- **"Get the URL of my current Safari tab"** — Returns the URL
+- **"Create a new Calendar event for Friday at 2pm"** — Adds it to Calendar
+- **"Show me what's on my clipboard"** — Displays clipboard contents
+- **"Send a message to John saying I'm running late"** — Sends via Messages
+
+Claude discovers what's possible, learns what works, and handles errors gracefully.
 
 ## Requirements
 
-- **macOS** (AppleScript is a macOS-only technology)
-- **Node.js** 18 or later
-- **Xcode** (full installation, not just Command Line Tools)
+- **macOS** (AppleScript is macOS-only)
+- **Node.js 18+** — [Download here](https://nodejs.org/)
+- **Xcode** — Install from the App Store (required for AppleScript dictionaries)
 
-### Why Xcode?
-
-The server uses the `sdef` command to retrieve AppleScript dictionaries from applications. This command requires Xcode to be installed and selected as the active developer directory.
-
-To verify your setup:
+After installing Xcode, run this to verify it's set up correctly:
 ```bash
 sdef /System/Applications/Notes.app | head -5
 ```
 
-If you see XML output, you're good. If you get an error about Xcode, install Xcode from the App Store and run:
+If you see XML output, you're good. If you get an error, run:
 ```bash
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ```
 
 ## Installation
 
-### From Source
+### Claude Code
 
-```bash
-# Clone or download this repository
-cd applescript-mcp
+Install via the plugin marketplace:
 
-# Install dependencies
-npm install
-
-# Build the TypeScript
-npm run build
+```
+/plugin marketplace add adamrdrew@marketplace
+/plugin install applescript-mcp@adamrdrew
 ```
 
-### Via NPX
+Restart Claude Code or run `/mcp` to verify it's connected.
 
-```bash
-npx -y applescript-mcp
-```
+### Claude Desktop
 
-## Usage
-
-### Configuring with Claude Code
-
-**Option 1: Global (all projects)**
-
-Add to `~/.claude/settings.json`:
+Add this to your config file at `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
-    "applescript": {
-      "command": "node",
-      "args": ["/path/to/applescript-mcp/dist/index.js"]
+    "applescript-mcp": {
+      "command": "npx",
+      "args": ["-y", "applescript-mcp"]
     }
   }
 }
 ```
 
-**Option 2: Single project**
+Restart Claude Desktop.
 
-Add a `.mcp.json` file to your project root:
+## Permissions
 
-```json
-{
-  "mcpServers": {
-    "applescript": {
-      "command": "node",
-      "args": ["/path/to/applescript-mcp/dist/index.js"]
-    }
-  }
-}
-```
+The first time Claude tries to control an app, macOS will ask for permission. Grant these in **System Settings → Privacy & Security**:
 
-Alternatively, add to `.claude/settings.local.json` in your project (same format as above).
+| Permission | When It's Needed |
+|------------|------------------|
+| **Automation** | Controlling any app (Finder, Music, Safari, etc.) |
+| **Accessibility** | Keyboard simulation, UI automation |
+| **Full Disk Access** | Some file operations |
 
-After configuring, restart Claude Code or run `/mcp` to verify the server is connected.
+When prompted, allow your terminal app (Terminal, iTerm, Warp, etc.) or Claude Desktop to control the requested application.
 
-### Configuring with Claude Desktop
+## What Apps Work?
 
-Add this to your Claude Desktop configuration file (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+Claude can control any "scriptable" macOS application. Most built-in apps are scriptable:
 
-```json
-{
-  "mcpServers": {
-    "applescript": {
-      "command": "node",
-      "args": ["/path/to/applescript-mcp/dist/index.js"]
-    }
-  }
-}
-```
+- **Finder** — File and folder operations
+- **Music** — Playback, playlists, library access
+- **Safari** — Tabs, URLs, reading lists
+- **Mail** — Send, read, organize emails
+- **Calendar** — Events and reminders
+- **Notes** — Create and manage notes
+- **Reminders** — Tasks and lists
+- **Messages** — Send messages
+- **Photos** — Albums and organization
+- **Contacts** — Address book access
+- **Keynote/Pages/Numbers** — Document automation
+- **Terminal** — Script execution
 
-### Running Standalone
-
-```bash
-npm start
-```
-
-When the server starts, you'll see a welcome banner:
-```
-🍎 Welcome to AppleScript MCP
-Version X.Y.Z
-
-✅ Server now running...
-```
-
-The server then waits for MCP protocol connections on stdin/stdout.
-
-## Available Tools
-
-### `list_scriptable_apps`
-
-Returns a list of all applications on the system that support AppleScript.
-
-**Parameters**: None
-
-**Example Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "apps": ["Finder", "Mail", "Safari", "Calendar", "Notes", "Music", ...]
-  }
-}
-```
-
-### `get_app_dictionary`
-
-Retrieves the AppleScript dictionary for an application with examples and detailed documentation.
-
-**Parameters**:
-- `app` (string, required): The application name (e.g., "Finder", "Safari")
-
-**Returns**: A comprehensive guide including:
-- Quick start examples
-- Key commands with syntax and usage examples
-- Key classes with property tables
-- Complete reference of all commands, classes, and enumerations
-- Tips for using the dictionary
-
-### `execute_applescript`
-
-Executes an AppleScript script with **safety analysis** and **learning**.
-
-**Parameters**:
-- `script` (string, required): The AppleScript code to execute
-- `intent` (string, optional): Natural language description of what this script does (used for learning)
-- `timeout` (number, optional): Timeout in milliseconds (default: 30000, max: 300000)
-- `confirmedDangerous` (boolean, optional): Set to true to execute high-risk scripts
-
-**Learning**: Executions are automatically logged to improve future suggestions. Pass an `intent` to help the learning system understand what you're trying to accomplish.
-
-**Safety Levels**:
-| Risk Level | Behavior | Example Operations |
-|------------|----------|-------------------|
-| None/Low | Executes normally | Get properties, display dialogs |
-| Medium | Warning in response | Keystrokes, sending emails |
-| High | Blocked until confirmed | Shell commands, quit all apps |
-| Critical | Blocked until confirmed | Delete all files, empty trash |
-
-**Example - Safe Script**:
-```json
-{
-  "script": "tell application \"Finder\" to get name of startup disk"
-}
-```
-
-**Example - Dangerous Script (blocked)**:
-```json
-{
-  "script": "tell application \"Finder\" to delete every file of desktop"
-}
-```
-Returns an error with safety warnings. To execute anyway:
-```json
-{
-  "script": "tell application \"Finder\" to delete every file of desktop",
-  "confirmedDangerous": true
-}
-```
-
-### `validate_applescript`
-
-Checks syntax AND analyzes safety without executing.
-
-**Parameters**:
-- `script` (string, required): The AppleScript code to validate
-
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "valid": true,
-    "errors": [],
-    "safetyAnalysis": {
-      "safe": true,
-      "risk": "none",
-      "warnings": [],
-      "requiresConfirmation": false
-    }
-  }
-}
-```
-
-### `get_system_state`
-
-Gets the current state of the Mac for context-aware automation.
-
-**Parameters**: None
-
-**Returns**: Frontmost app, running apps, Finder selection, clipboard contents, volume level, currently playing music, open Safari tabs.
-
-## Learning System
-
-The server includes a learning system that improves over time by remembering what works.
-
-### How It Works
-
-1. **Pattern Storage**: Every script execution is logged to `~/.applescript-mcp/learned-patterns.json` with its intent, success/failure status, and result
-2. **Indexing**: Patterns are indexed by app, action type (create, delete, play, etc.), and keywords for fast retrieval
-3. **Success Tracking**: Successful patterns accumulate a success count, making them more likely to be suggested
-4. **Skill Files**: App-specific markdown guides in `~/.applescript-mcp/skills/` provide curated examples and gotchas
-
-### Learning Tools
-
-### `get_workflow_pattern`
-
-Find similar AppleScript patterns that have worked before.
-
-**Parameters**:
-- `intent` (string, required): What you want to accomplish (e.g., "create a playlist")
-- `app` (string, optional): Filter by app name
-- `action` (string, optional): Filter by action type (create, delete, get, play, etc.)
-
-**Returns**: Matching patterns from history with success counts, plus relevant examples from skill files.
-
-### `analyze_failure`
-
-Analyze why an AppleScript failed and get actionable fix suggestions.
-
-**Parameters**:
-- `script` (string, required): The AppleScript that failed
-- `error` (string, required): The error message
-
-**Returns**: Root cause analysis, specific fixes, and sometimes auto-corrected scripts. Includes Music.app-specific error handling.
-
-### `get_app_skill`
-
-Get the skill guide for an app with working examples and common gotchas.
-
-**Parameters**:
-- `app` (string, required): The app name (e.g., "Music", "Finder")
-
-**Returns**: Curated examples, troubleshooting tips, and correct patterns. Available for: Music, Finder, Safari, Mail, Reminders, Calendar, Notes, Messages, Contacts, Photos.
-
-### `get_smart_suggestion`
-
-Get an intelligent script suggestion based on learned patterns and skills.
-
-**Parameters**:
-- `app` (string, required): The target app
-- `intent` (string, required): What you want to do in natural language
-
-**Returns**: Best script approach with confidence level and warnings.
-
-### `get_learning_stats`
-
-Get statistics about the learning system.
-
-**Parameters**: None
-
-**Returns**: Total patterns, success rates, patterns by app/category, and available skill files.
-
-### `discover_capabilities`
-
-Show what Mac automation is possible, prioritized by currently running apps.
-
-**Parameters**:
-- `app` (string, optional): Get detailed capabilities for a specific app
-
-**Returns**: Context-aware overview of capabilities with example prompts to try.
+Many third-party apps are also scriptable (Adobe apps, BBEdit, OmniFocus, etc.).
 
 ## Safety Features
 
-The server automatically detects and blocks dangerous operations:
+The server protects you from accidental damage:
 
-| Pattern | Risk Level | What It Catches |
-|---------|------------|-----------------|
-| `delete every file/folder` | Critical | Bulk file deletion |
-| `empty trash` | Critical | Permanent deletion |
-| `delete every event/reminder/note` | Critical | Bulk data deletion |
-| `do shell script` | High | Shell command execution |
-| `shutdown/restart/sleep` | High | System power commands |
-| `quit every application` | High | Mass app termination |
-| `keystroke` / `key code` | Medium | Keyboard simulation |
-| `send` (email) | Medium | Sending messages |
+| Risk Level | What Happens | Examples |
+|------------|--------------|----------|
+| **Low** | Runs normally | Get info, read data |
+| **Medium** | Warning shown | Sending emails, keystrokes |
+| **High** | Blocked until you confirm | Shell commands, quit all apps |
+| **Critical** | Blocked until you confirm | Delete all files, empty trash |
 
-## Error Messages
+If Claude tries something risky, you'll see a warning and can decide whether to proceed.
 
-The server provides actionable error messages:
+## Learning System
 
-**Permission Denied**:
+The server gets smarter over time:
+
+- **Remembers what works** — Successful scripts are saved for future reference
+- **Suggests fixes** — When something fails, it offers specific solutions
+- **Skill files** — Curated examples for popular apps live in `~/.applescript-mcp/skills/`
+
+## Helpful Error Messages
+
+When something goes wrong, you get actionable fixes:
+
 ```
 ❌ Automation permission denied for Safari.
 
 HOW TO FIX:
 1. Open System Settings
 2. Go to Privacy & Security → Automation
-3. Find your terminal app (Terminal, iTerm, etc.)
+3. Find your terminal app
 4. Enable the toggle for "Safari"
-5. You may need to restart your terminal
+5. Restart your terminal
 ```
 
-**App Not Running**:
-```
-❌ Keynote is not running.
+## Troubleshooting
 
-HOW TO FIX:
-1. Launch Keynote manually, OR
-2. Add 'activate' before your command:
-   tell application "Keynote"
-     activate
-     -- your commands here
-   end tell
-```
-
-## Example Workflows
-
-### Workflow 1: Discover and Automate
-
-```
-1. list_scriptable_apps → Find that "Music" is scriptable
-2. get_app_dictionary("Music") → See available commands with examples
-3. validate_applescript("tell app \"Music\" to get current track")
-4. execute_applescript("tell app \"Music\" to get name of current track")
-```
-
-### Workflow 2: Safe Bulk Operations
-
-```
-1. Write script: "tell app \"Finder\" to delete every file of folder \"Temp\""
-2. validate_applescript → See it's flagged as "critical" risk
-3. Review the warning, decide if it's what you want
-4. execute_applescript with confirmedDangerous: true
-```
-
-## Permissions
-
-AppleScript automation requires permissions in System Settings:
-
-1. **Privacy & Security → Automation**: Required for controlling apps
-2. **Privacy & Security → Accessibility**: Required for keystroke/UI automation
-3. **Privacy & Security → Full Disk Access**: Required for some file operations
-
-## Development
-
+**"Xcode is not installed"**
+Install Xcode from the App Store, then run:
 ```bash
-npm run dev      # Watch mode
-npm run typecheck # Type checking only
-npm run build    # Production build
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ```
 
-## Project Structure
+**"Permission denied" errors**
+Open System Settings → Privacy & Security → Automation and enable the app.
 
-```
-applescript-mcp/
-├── src/
-│   ├── index.ts              # MCP server entry point
-│   ├── version.ts            # Version reading and startup banner
-│   ├── types.ts              # TypeScript interfaces
-│   ├── tools/
-│   │   ├── list-apps.ts      # List scriptable applications
-│   │   ├── get-dictionary.ts # Get app dictionaries
-│   │   ├── execute.ts        # Execute with safety checks
-│   │   ├── system-state.ts   # Get current Mac state
-│   │   ├── smart-tools.ts    # Learning-powered tools
-│   │   └── discover.ts       # Capability discovery
-│   ├── learning/
-│   │   ├── pattern-store.ts  # Execution history & indexing
-│   │   ├── skill-loader.ts   # Load app skill files
-│   │   └── analyzer.ts       # Error analysis & fix suggestions
-│   └── apple/
-│       ├── sdef-parser.ts    # Parse sdef XML with examples
-│       └── executor.ts       # osascript wrapper
-├── package.json
-├── tsconfig.json
-└── README.md
+**Commands don't work on an app**
+Not all apps are scriptable. Ask Claude to run `list_scriptable_apps` to see what's available.
 
-~/.applescript-mcp/           # User data directory
-├── learned-patterns.json     # Execution history
-├── patterns-index.json       # Fast lookup indices
-└── skills/                   # App-specific skill files (*.md)
-```
+**Server not connecting**
+- For Claude Code: Run `/mcp` to check status
+- For Claude Desktop: Restart the app after editing config
 
+## Contributing
 
+Want to contribute, run from source, or understand the codebase? See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## License
+
+MIT
