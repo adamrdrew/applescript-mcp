@@ -217,8 +217,21 @@ Laws use RFC 2119 language: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
 
 ---
 
+### L24 — Phase Approval Release Workflow
+
+- **Rule:** When Overseer marks a Phase as GREEN/approved, Overseer MUST:
+  1. Increment the version in both `.claude-plugin/plugin.json` and `package.json`. These versions MUST remain in sync.
+  2. Create a git tag matching the new version number (e.g., `2.2.0`).
+  3. Instruct the user to run `./release.sh` to release the new version.
+- **Rationale:** Consistent versioning and tagging ensures traceability between releases, code state, and plugin distribution. Manual release step gives the user final control.
+- **Enforcement:** Overseer checklist includes version increment verification, tag creation, and release instruction. Phase cannot be closed until all three steps are documented as complete.
+- **Exceptions:** None.
+
+---
+
 ## Changelog
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-01-29 | Added L24 — Phase Approval Release Workflow | Ushabti Lawgiver |
 | 2026-01-29 | Initial inscription of 23 laws | Ushabti Lawgiver |

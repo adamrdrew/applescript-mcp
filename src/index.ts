@@ -36,6 +36,7 @@ import {
   isSmartSuggestionParams,
   isDiscoverCapabilitiesParams,
 } from './types.js';
+import { getPackageVersion, formatStartupBanner } from './version.js';
 
 /**
  * Tool definitions for the MCP server
@@ -229,11 +230,11 @@ const tools: Tool[] = [
 /**
  * Create and configure the MCP server
  */
-function createServer(): Server {
+function createServer(version: string): Server {
   const server = new Server(
     {
       name: 'applescript-mcp',
-      version: '2.1.0', // Added discoverability features
+      version,
     },
     {
       capabilities: {
@@ -567,7 +568,14 @@ function createServer(): Server {
 }
 
 async function main(): Promise<void> {
-  const server = createServer();
+  // Read version once from package.json (single source of truth)
+  const version = getPackageVersion();
+
+  // Display startup banner to stderr (not stdout, which is used by MCP protocol)
+  const banner = formatStartupBanner(version);
+  process.stderr.write(banner + '\n');
+
+  const server = createServer(version);
   const transport = new StdioServerTransport();
 
   await server.connect(transport);
