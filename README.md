@@ -65,7 +65,21 @@ Add this to your config file at `~/Library/Application Support/Claude/claude_des
 
 Restart Claude Desktop.
 
-## Permissions
+## Claude Code Permissions
+
+Claude Code will ask you every time you use an MCP server command for the first time, meaning when you start using the MCP server you will get lots of "are you sure you want to do this?" prompts, which is a pretty terrible experience. After installing the plugin you can allowlist calls to the MCP server bu adding this to your `.claude/settings.json`
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_applescript-mcp_applescript-mcp-server__*"
+    ]
+  }
+}
+```
+
+## System Permissions
 
 The first time Claude tries to control an app, macOS will ask for permission. Grant these in **System Settings → Privacy & Security**:
 
