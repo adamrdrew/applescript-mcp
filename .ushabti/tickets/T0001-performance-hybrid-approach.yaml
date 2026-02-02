@@ -1,0 +1,124 @@
+id: T0001
+title: Performance Hybrid Approach - Built-in Skills and Smart Suggestions
+created: 2026-02-01
+priority: high
+context: |
+  Current performance problem: LLM must discover working AppleScript patterns
+  through trial-and-error because it lacks upfront knowledge. Each iteration
+  requires a round-trip through the MCP protocol and osascript shell execution,
+  compounding latency.
+
+  Root causes identified:
+  1. No proactive knowledge transfer - learning system is reactive only
+  2. Dictionary alone is inadequate - provides structure but not usage patterns
+  3. Skill files exist but aren't discoverable - LLM doesn't know to ask
+  4. Pattern store requires history - useless on first encounter
+
+  The hybrid approach (Option 5 from analysis) addresses both "no prior knowledge"
+  and "LLM doesn't know to ask" problems through a layered solution:
+  - Skills provide knowledge
+  - Suggestions combine skills with patterns
+  - Tool descriptions guide LLM behavior
+
+  Expected impact: Very high - dramatically reduces time-to-success on first
+  attempts while maintaining long-term learning benefits.
+proposed_work: |
+  ## Component 1: Ship Built-in Skill Library
+
+  Create and bundle skill markdown files for top 10 macOS apps covering ~80%
+  of automation use cases:
+  - Music.app
+  - Finder
+  - Safari
+  - Mail
+  - Calendar
+  - Notes
+  - Reminders
+  - Messages
+  - Contacts
+  - Photos
+
+  Each skill file should contain:
+  - Working examples for common tasks (extracted as code blocks)
+  - Common gotchas section (already extracted by getGotchas())
+  - Object model explanations
+  - Troubleshooting tables
+
+  Implementation:
+  - Create src/skills/ directory for canonical skill files
+  - Add installation logic on server startup to copy skills to ~/.applescript-mcp/skills/
+  - Check if skills directory is empty/missing on startup
+  - Only install if user directory is unpopulated (don't overwrite user customizations)
+
+  ## Component 2: Update Tool Descriptions
+
+  Modify tool descriptions in src/index.ts to guide LLM behavior:
+
+  For execute_applescript:
+  - Add guidance: "For new tasks, call get_smart_suggestion first to get a
+    starting script based on learned patterns and skill files"
+  - Mention that get_app_skill should be checked if available
+
+  For get_smart_suggestion:
+  - Clarify this is the primary entry point for new tasks
+  - Explain confidence levels and how to interpret them
+  - List which apps have built-in skill files
+
+  For get_app_skill:
+  - List available built-in skills explicitly
+  - Explain when to use (before writing scripts for covered apps)
+
+  ## Component 3: Enhance get_smart_suggestion Formatting
+
+  Improve src/tools/smart-tools.ts getSmartSuggestion() output for better
+  actionability:
+
+  - Clear confidence indicators with explanations
+    - High: "Used 3+ times successfully"
+    - Medium: "Based on skill example" or "Used 1-2 times"
+    - Low: "Generic template, no prior knowledge"
+
+  - Inline warnings from gotchas at top of response
+    - Format: "⚠️ Common Gotcha: [warning text]"
+    - Pull from skill file quickRef.gotchas
+
+  - Improved fallback messaging
+    - When no patterns/skills exist, be explicit about limitation
+    - Guide user to check dictionary or create simpler test first
+
+  - Better structuring of response
+    - Separate sections for: suggestion, confidence, warnings, related patterns
+    - Use markdown formatting for clarity
+
+  ## Acceptance Criteria
+
+  1. Skill files exist for all 10 listed apps in src/skills/
+  2. Each skill file contains minimum 5 working examples
+  3. Each skill file has gotchas and troubleshooting sections
+  4. Installation logic copies skills on first startup
+  5. Tool descriptions updated per Component 2 specification
+  6. get_smart_suggestion returns enhanced format per Component 3
+  7. Tests verify skill installation works correctly
+  8. Documentation updated:
+     - README mentions built-in skills for 10 apps
+     - .ushabti/docs/learning.md documents skill installation
+     - CONTRIBUTING.md explains how to add new skills
+
+  ## Implementation Notes
+
+  Leverage existing infrastructure:
+  - skill-loader.ts already handles loading and parsing
+  - getRelevantExamples() already scores examples by keyword
+  - getQuickReference() already extracts structured data
+  - No protocol changes or API modifications needed
+
+  Skill curation priorities:
+  - Focus on apps with non-obvious idioms (Music.app is highest priority)
+  - Include at least 3 examples per common task category
+  - Document quirks that cause trial-and-error (e.g., Music uses "duplicate"
+    not "add", search requires "library playlist 1")
+
+  Estimated effort: 2-3 days total
+  - Day 1: Curate 10 skill files with examples and gotchas
+  - Day 2: Add installation logic, update tool descriptions
+  - Day 3: Enhance get_smart_suggestion, update docs, test
