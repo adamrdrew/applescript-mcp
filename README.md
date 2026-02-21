@@ -169,3 +169,7 @@ Not all apps are scriptable. Ask Claude to run `list_scriptable_apps` to see wha
 Want to contribute, run from source, or understand the codebase? See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 Want even deeper documentaiton? See the [Project Documentation](.ushabti/docs/index.md)
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](./LICENSE).
